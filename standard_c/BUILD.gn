@@ -7,7 +7,14 @@ executable("hello_world") {
   ]
 }
 
-static_library("hello") {
+
+config("hello_config") {
+  defines = [
+    "TWO_PEOPLE",
+  ]
+}
+
+static_library("hello_static") {
   sources = [
     "hello.cc",
   ]
@@ -16,19 +23,30 @@ static_library("hello") {
   ]
 }
 
-config("hello_config") {
-  defines = [
-    "TWO_PEOPLE",
-  ]
-}
-
-executable("say_hello") {
+executable("say_hello_static") {
   sources = [
     "say_hello.cc",
   ]
   deps = [
-    ":hello",
+    ":hello_static",
   ]
 }
 
+shared_library("hello_shared") {
+  sources = [
+    "hello.cc",
+    "hello.h"
+  ]
+  all_dependent_configs = [
+    ":hello_config"
+  ]
+}
 
+executable("say_hello_shared") {
+  sources = [
+    "say_hello.cc",
+  ]
+  deps = [
+    ":hello_shared",
+  ]
+}

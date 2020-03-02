@@ -1,13 +1,11 @@
 
-
 group("tutorial"){
   deps = [
-    "standard_c:say_hello",
-    "java:hello_java_binary",
-    # 
+    "standard_c:hello_world",
   ]
   if (is_android){
     deps += [
+      "java:hello_java_binary",
       "android/hello_apk",
       "android/hello_jni",
       "android/hello_aar",
