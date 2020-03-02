@@ -1,0 +1,78 @@
+import("//build/config/android/rules.gni")
+# import("//build/config/android/config.gni")
+# import("//build/util/process_version.gni")
+
+_registration_header = "$target_gen_dir/hello_jni_registration.h"
+
+generate_jni("hello_jni_header") {
+    sources = [
+        "java/com/jsq/jni/sample/Hello.java",
+    ]
+}
+
+android_library("hello_jni_java"){
+    java_files = [
+        "java/com/jsq/jni/sample/Hello.java",
+    ]
+
+    deps = [
+        "//base:base_java",
+        "//base:jni_java",
+    ]
+
+    annotation_processor_deps = [ "//base/android/jni_generator:jni_processor" ]
+
+}
+
+source_set("hello_jni_native_side"){
+    deps = [
+        ":hello_jni_header",
+        "//base",
+    ]
+    sources = [
+        "jni/hello.cc",
+        "jni/hello.h",
+    ]
+}
+
+shared_library("hello_jni_lib"){
+    sources = [
+        "jni/hello_entry_point.cc",
+        _registration_header,
+    ]
+
+    deps = [
+        ":hello_jni_native_side",
+        ":hello_jni__final_jni",
+        "//base",
+    ]
+
+}
+
+
+
+
+
+android_apk("hello_jni"){
+    apk_name="HelloJni"
+    android_manifest = "AndroidManifest.xml"
+    target_sdk_version = 24
+    java_files = [
+        "java/com/jsq/jni/sample/MainActivity.java"
+    ]
+    deps = [
+        ":hello_jni_java",
+        # ":hello_jni_res",
+        "//base:base_java",
+        "//base:jni_java",
+    ]
+
+    shared_libraries = [ ":hello_jni_lib" ]
+    jni_registration_header = _registration_header
+}
+
+
+# android_resources("hello_jni_res") {
+#   resource_dirs = [ "res" ]
+#   custom_package = "com.jsq.jni.sample"
+# }

@@ -1,0 +1,15 @@
+import("//build/config/android/rules.gni")
+
+
+java_library("hello_java_lib") {
+  java_files = [ "src/com/jsq/demo/Add.java" ]
+  # 编译出来的文件在  $outpath/lib.java/$(pwd)/hello_java_lib.jar
+  # 这里jar 名字默认是hello_java_lib.jar
+  # output_name = "hello_java_lib" 如果自定义名字，不用带.jar后缀
+}
+
+java_binary("hello_java_binary"){
+  java_files = [ "src/com/jsq/demo/Main.java" ]
+  deps = [ ":hello_java_lib" ]
+  main_class = "com.jsq.demo.Main"
+}

@@ -1,0 +1,34 @@
+
+
+
+executable("hello_world") {
+  sources = [
+    "hello_world.cc",
+  ]
+}
+
+static_library("hello") {
+  sources = [
+    "hello.cc",
+  ]
+  all_dependent_configs = [
+    ":hello_config"
+  ]
+}
+
+config("hello_config") {
+  defines = [
+    "TWO_PEOPLE",
+  ]
+}
+
+executable("say_hello") {
+  sources = [
+    "say_hello.cc",
+  ]
+  deps = [
+    ":hello",
+  ]
+}
+
+

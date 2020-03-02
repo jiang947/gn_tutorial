@@ -1,0 +1,2 @@
+
+root_extra_deps = [ "//gn_tutorial:tutorial" ]

@@ -1,0 +1,22 @@
+
+import("//build/config/android/rules.gni")
+
+
+android_apk("hello_apk"){
+  android_manifest = "AndroidManifest.xml"
+  apk_name="sample"
+  java_files = [ 
+    "java/com/jsq/sample/MainActivity.java"
+  ]
+  deps = [
+    ":hello_apk_resources",
+      # "//third_party/android_deps:androidx_appcompat_appcompat_java",
+  ]
+}
+
+
+android_resources("hello_apk_resources") {
+  resource_dirs = [ "res" ]
+  custom_package = "com.jsq.sample"
+}
+

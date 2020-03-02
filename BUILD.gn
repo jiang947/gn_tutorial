@@ -1,0 +1,16 @@
+
+
+group("tutorial"){
+  deps = [
+    "standard_c:say_hello",
+    "java:hello_java_binary",
+    # 
+  ]
+  if (is_android){
+    deps += [
+      "android/hello_apk",
+      "android/hello_jni",
+      "android/hello_aar",
+    ]
+  }
+}
