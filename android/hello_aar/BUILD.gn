@@ -3,29 +3,112 @@ import("//build/config/android/rules.gni")
 import("//build/util/process_version.gni")
 
 
+# _registration_header = "$target_gen_dir/hello_aar_jni_registration.h"
 
 dist_aar("hello_aar") {
-    android_manifest = "AndroidManifest.xml"
-    deps = [
-        ":hello_aar_java",
-    ]   
+  android_manifest = "AndroidManifest.xml"
+  deps = [
+    ":hello_aar_java",
+    ":hello_aar_shared_lib",
+  ]   
 
-    output = "$root_build_dir/aars/HelloAar.aar"
+  native_libraries = [
+    "$root_build_dir/libhello_aar_shared_lib.so",
+  ]
+
+    resource_included_patterns =[
+      "*/hello_aar/*"
+    ]
+  # jar_included_patterns = [
+  #   "com/jsq/aar/sample/*",
+  # ]
+
+  jar_excluded_patterns = [
+    "com/jsq/aar/sample/R\$*.class",
+    "com/jsq/aar/sample/R.class",
+    "gen/*",
+    "android/arch/*",
+    "android/support/design/*",
+    "android/support/v4/R\$*.class",
+    "android/support/v4/R.class",
+
+    "android/support/annotation/*",
+    "android/support/v7/*",
+    "android/support/v13/*",
+    "android/support/asynclayoutinflater/*",
+    "android/support/swiperefreshlayout/*",
+    "android/support/slidingpanelayout/*",
+    "android/support/coordinatorlayout/*",
+    "android/support/mediacompat/*",
+    "android/support/coreutils/*",
+    "android/support/drawerlayout/*",
+    "android/support/customview/*",
+    "android/support/fragment/*",
+    "android/support/coreui/*",
+    "android/support/compat/*",
+    "android/support/loader/*",
+    "androidx/core/*",
+    "androidx/media/*",
+    "androidx/version*",
+    
+    "META-INF/*",
+  ]
+
+
+  output = "$root_build_dir/aars/HelloAar.aar"
 }
 
 
 
 
+
+shared_library("hello_aar_shared_lib"){
+  sources = [
+    "jni/hello_aar_entry_point.cc",
+    # _registration_header,
+  ]
+
+  deps = [
+    ":hello_aar_native_side",
+    "//base",
+  ]
+
+}
+
+source_set("hello_aar_native_side"){
+    deps = [
+        ":hello_jni_header",
+        "//base",
+    ]
+    sources = [
+        "jni/hello.cc",
+        "jni/hello.h",
+    ]
+}
+
+generate_jni("hello_jni_header") {
+  sources = [
+    "java/com/jsq/aar/sample/Hello.java",
+  ]
+}
 
 
 android_library("hello_aar_java") {
   java_files = [
-    "java/com/jsq/aar/sample/SampleActivity.java"
+    "java/com/jsq/aar/sample/SampleActivity.java",
+    "java/com/jsq/aar/sample/Hello.java",
   ]
   deps = [
     ":aar_resources",
+    "//base:base_java",
+    "//base:jni_java",
   ]
+
+  annotation_processor_deps = [ "//base/android/jni_generator:jni_processor" ]
 }
+
+
+
 
 android_resources("aar_resources") {
   resource_dirs = [ "res" ]

@@ -13,10 +13,12 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // setContentView(R.layout.activity_main);
-        // TextView textView = findViewById(R.id.text_view);
-        // MainActivityJni().get().getStringFormJni();
+        
         TextView textView = new TextView(this);
+        textView.setText(Hello.getString());
         setContentView(textView);
+
+
     }
 
 

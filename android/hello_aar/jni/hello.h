@@ -9,15 +9,15 @@
 
 #include "base/android/jni_android.h"
 
-namespace test {
-namespace {
+namespace base {
+namespace android {
 
 class Hello {
     public:
     Hello();
     ~Hello();
 
-    // base::android::ScopedJavaLocalRef<jstring> GetString(JNIEnv* env);
+    // base::android::ScopedJavaLocalRef<jstring> getStringFormNative(JNIEnv* env);
 
 
 };
