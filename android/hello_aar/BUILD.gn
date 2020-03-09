@@ -3,22 +3,26 @@ import("//build/config/android/rules.gni")
 import("//build/util/process_version.gni")
 
 
-# _registration_header = "$target_gen_dir/hello_aar_jni_registration.h"
+_registration_header = "$target_gen_dir/hello_aar_jni_registration.h"
 
+_package_dir = "$root_out_dir/hello_aar"
+
+# 最终打包出来的aar
 dist_aar("hello_aar") {
   android_manifest = "AndroidManifest.xml"
   deps = [
-    ":hello_aar_java",
     ":hello_aar_shared_lib",
+    ":hello_aar_java_part",
   ]   
 
   native_libraries = [
     "$root_build_dir/libhello_aar_shared_lib.so",
   ]
 
-    resource_included_patterns =[
-      "*/hello_aar/*"
-    ]
+
+  resource_included_patterns =[
+    "*/hello_aar/*"
+  ]
   # jar_included_patterns = [
   #   "com/jsq/aar/sample/*",
   # ]
@@ -27,13 +31,13 @@ dist_aar("hello_aar") {
     "com/jsq/aar/sample/R\$*.class",
     "com/jsq/aar/sample/R.class",
     "gen/*",
-    "android/arch/*",
-    "android/support/design/*",
+    # "android/arch/*",
+    # "android/support/design/*",
     "android/support/v4/R\$*.class",
     "android/support/v4/R.class",
 
     "android/support/annotation/*",
-    "android/support/v7/*",
+    # "android/support/v7/*",
     "android/support/v13/*",
     "android/support/asynclayoutinflater/*",
     "android/support/swiperefreshlayout/*",
@@ -47,9 +51,9 @@ dist_aar("hello_aar") {
     "android/support/coreui/*",
     "android/support/compat/*",
     "android/support/loader/*",
-    "androidx/core/*",
-    "androidx/media/*",
-    "androidx/version*",
+    # "androidx/core/*",
+    # "androidx/media/*",
+    # "androidx/version*",
     
     "META-INF/*",
   ]
@@ -59,33 +63,64 @@ dist_aar("hello_aar") {
 }
 
 
+template("repackage_jars") {
+  dist_jar(target_name) {
+    requires_android = true
+    direct_deps_only = true
+    use_unprocessed_jars = true
+    no_build_hooks = true
+    forward_variables_from(invoker, "*")
+  }
+}
 
 
+generate_jni_registration("hello_aar_jni_registration") {
+  target = ":hello_aar_native_base_java"
+  # header_output = _jni_registration_header
+  header_output = _registration_header
+  # sources_blacklist = [
+  #   "//base/android/java/src/org/chromium/base/library_loader/LibraryLoader.java",
+  #   "//base/android/java/src/org/chromium/base/library_loader/LibraryPrefetcher.java",
+  #   "//base/android/java/src/org/chromium/base/process_launcher/ChildProcessService.java",
+  #   "//base/android/java/src/org/chromium/base/SysUtils.java",
+  # ]
+}
 
+# native 部分 动态链接库 *.so
 shared_library("hello_aar_shared_lib"){
   sources = [
     "jni/hello_aar_entry_point.cc",
-    # _registration_header,
+    _registration_header,
   ]
 
   deps = [
-    ":hello_aar_native_side",
+    ":hello_aar_static",
+    ":hello_aar_jni_registration",
     "//base",
   ]
-
+  configs -= [ "//build/config/android:hide_all_but_jni_onload" ]
 }
 
-source_set("hello_aar_native_side"){
-    deps = [
-        ":hello_jni_header",
-        "//base",
-    ]
-    sources = [
-        "jni/hello.cc",
-        "jni/hello.h",
-    ]
+
+# native 部分 静态链接库 *.a
+source_set("hello_aar_static"){
+  deps = [
+    ":hello_jni_header",
+    # ":hello_aar_jni_registration",
+    "//base",
+  ]
+  sources = [
+    "jni/hello.cc",
+    "jni/hello.h",
+  ]
+
+  libs = [
+    "android",
+    "log",
+  ]
 }
 
+# 根据java 生成.h头文件
 generate_jni("hello_jni_header") {
   sources = [
     "java/com/jsq/aar/sample/Hello.java",
@@ -93,24 +128,88 @@ generate_jni("hello_jni_header") {
 }
 
 
-android_library("hello_aar_java") {
+# java 部分
+android_library("hello_aar_java_part") {
   java_files = [
     "java/com/jsq/aar/sample/SampleActivity.java",
-    "java/com/jsq/aar/sample/Hello.java",
   ]
   deps = [
     ":aar_resources",
+    ":package_impl_native_java",
     "//base:base_java",
     "//base:jni_java",
   ]
-
-  annotation_processor_deps = [ "//base/android/jni_generator:jni_processor" ]
+  
 }
 
 
+java_prebuilt("package_impl_native_java") {
+  jar_path = "$_package_dir/hello_aar_impl_native_java.jar"
+  supports_android = true
+  requires_android = true
+  deps = [
+    ":repackage_native",
+    "//third_party/android_deps:android_support_v4_java",
+    "//third_party/android_deps:com_android_support_multidex_java",
+    "//third_party/jsr-305:jsr_305_javalib",
+  ]
+
+}
+
+
+android_library("hello_aar_jni_registration_java") {
+  srcjar_deps = [ ":hello_aar_jni_registration" ]
+}
+
+repackage_jars("repackage_native") {
+  output = "$_package_dir/hello_aar_impl_native_java.jar"
+  deps = [
+    # 一定要用hello_aar_jni_registration_java 包一层， 不能直接使用`:hello_aar_jni_registration`
+    ":hello_aar_jni_registration_java", # 这里是关键 
+    ":repackage_native_java",
+  ]
+}
+
+_native_intermediate_jar_path = "$target_out_dir/repackage_native_impl.jar"
+
+android_java_prebuilt("repackage_native_java") {
+  jar_path = _native_intermediate_jar_path
+
+  # Since only the unprocessed jar is used, no need to complete the bytecode
+  # processing steps.
+  enable_bytecode_rewriter = false
+  deps = [
+    ":repackage_native_impl",
+  ]
+  
+}
+
+repackage_jars("repackage_native_impl") {
+  output = _native_intermediate_jar_path
+  
+  deps = [
+    "//base:base_java",
+    "//base:jni_java",
+    ":hello_aar_native_base_java",
+  ]
+
+}
+
+android_library("hello_aar_native_base_java") {
+  java_files = [
+    "java/com/jsq/aar/sample/Hello.java",
+  ]
+  deps = [
+    "//base:base_java",
+    "//base:jni_java",
+  ]
+  annotation_processor_deps = [ "//base/android/jni_generator:jni_processor" ]
+  
+}
 
 
 android_resources("aar_resources") {
   resource_dirs = [ "res" ]
   custom_package = "com.jsq.aar.sample"
 }
+
