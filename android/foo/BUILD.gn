@@ -1,0 +1,61 @@
+import("//build/config/android/rules.gni")
+
+import("//gn_tutorial/android/build/hello.gni")
+
+
+group("foo"){
+  deps = [
+    ":foo_java"
+  ]
+}
+
+
+# dist_aar("foo_aar"){
+#   deps = [
+#     ":foo_java",
+#   ]  
+  
+# }
+
+
+# 这里命名有坑， 必须要包含'java'
+android_library("foo_java"){
+  java_files = [
+    "java/com/jsq/foo/ReadRes.java",
+  ]
+  deps = [
+    ":foo_resources"
+  ]
+}
+
+# 这里命名有坑， 必须要包含'resources'
+android_resources("foo_resources") {
+  resource_dirs = [ "res" ]
+  custom_package = "com.jsq.foo.res"
+}
+
+
+dist_aar("foo_aar"){
+  android_manifest = "AndroidManifest.xml"
+  deps = [
+    "//gn_tutorial/android/foo:foo_java"
+  ]
+
+  jar_excluded_patterns = [
+    "com/jsq/foo/R.class",
+    "com/jsq/foo/R\$*.class",
+  ]
+
+  output = "$root_build_dir/aars/FooAar.aar"
+}
+
+
+android_apk("foo_apk"){
+  android_manifest = "AndroidManifest.xml"
+  deps = [
+    "//gn_tutorial/android/foo:foo_java"
+  ]
+
+  apk_name="foo_apk"
+
+}

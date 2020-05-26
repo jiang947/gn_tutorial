@@ -5,6 +5,12 @@
 #include "base/android/jni_android.h"
 #include "gn_tutorial/android/hello_aar/hello_aar_jni_registration.h"
 #include "base/android/jni_utils.h"
+#include <android/log.h>
+
+
+
+#define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "hello_aar", __VA_ARGS__))
+
 
 // This is called by the VM when the shared library is first loaded.
 JNI_EXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {

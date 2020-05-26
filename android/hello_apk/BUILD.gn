@@ -8,8 +8,11 @@ android_apk("hello_apk"){
   java_files = [ 
     "java/com/jsq/sample/MainActivity.java"
   ]
+
   deps = [
     ":hello_apk_resources",
+    "//gn_tutorial/android/foo:foo_java",
+    "//gn_tutorial/android/bar:bar_java",
       # "//third_party/android_deps:androidx_appcompat_appcompat_java",
   ]
 }
@@ -20,3 +23,4 @@ android_resources("hello_apk_resources") {
   custom_package = "com.jsq.sample"
 }
 
+# temp

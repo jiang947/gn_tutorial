@@ -13,6 +13,7 @@ dist_aar("hello_aar") {
   deps = [
     ":hello_aar_shared_lib",
     ":hello_aar_java_part",
+    "//gn_tutorial/android/foo:foo_java",
   ]   
 
   native_libraries = [
@@ -21,40 +22,50 @@ dist_aar("hello_aar") {
 
 
   resource_included_patterns =[
-    "*/hello_aar/*"
+    "*/hello_aar/*",
+    "*/foo/*",
   ]
   # jar_included_patterns = [
-  #   "com/jsq/aar/sample/*",
+  #   "com/jsq/*",
+  # ]
+
+  # jar_excluded_patterns = [
+  #   "com/jsq/aar/sample/R\$*.class",
+  #   "com/jsq/aar/sample/R.class",
+  #   "gen/*",
+  #   "com/jsq/foo/R.class",
+  #   "com/jsq/foo/R\$*.class",
   # ]
 
   jar_excluded_patterns = [
     "com/jsq/aar/sample/R\$*.class",
     "com/jsq/aar/sample/R.class",
     "gen/*",
-    # "android/arch/*",
-    # "android/support/design/*",
-    "android/support/v4/R\$*.class",
-    "android/support/v4/R.class",
+    "com/jsq/foo/R.class",
+    "com/jsq/foo/R\$*.class",
+    # # "android/arch/*",
+    # # "android/support/design/*",
+    # "android/support/v4/R\$*.class",
+    # "android/support/v4/R.class",
 
-    "android/support/annotation/*",
+    # "android/support/annotation/*",
     # "android/support/v7/*",
-    "android/support/v13/*",
-    "android/support/asynclayoutinflater/*",
-    "android/support/swiperefreshlayout/*",
-    "android/support/slidingpanelayout/*",
-    "android/support/coordinatorlayout/*",
-    "android/support/mediacompat/*",
-    "android/support/coreutils/*",
-    "android/support/drawerlayout/*",
-    "android/support/customview/*",
-    "android/support/fragment/*",
-    "android/support/coreui/*",
-    "android/support/compat/*",
-    "android/support/loader/*",
-    # "androidx/core/*",
-    # "androidx/media/*",
-    # "androidx/version*",
-    
+    # "android/support/v13/*",
+    # "android/support/asynclayoutinflater/*",
+    # "android/support/swiperefreshlayout/*",
+    # "android/support/slidingpanelayout/*",
+    # "android/support/coordinatorlayout/*",
+    # "android/support/mediacompat/*",
+    # "android/support/coreutils/*",
+    # "android/support/drawerlayout/*",
+    # "android/support/customview/*",
+    # "android/support/fragment/*",
+    # "android/support/coreui/*",
+    # "android/support/compat/*",
+    # "android/support/loader/*",
+
+    "android/*",
+    "androidx/*", 
     "META-INF/*",
   ]
 
@@ -98,7 +109,7 @@ shared_library("hello_aar_shared_lib"){
     ":hello_aar_jni_registration",
     "//base",
   ]
-  configs -= [ "//build/config/android:hide_all_but_jni_onload" ]
+  # configs -= [ "//build/config/android:hide_all_but_jni_onload" ]
 }
 
 

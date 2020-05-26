@@ -9,6 +9,8 @@ group("tutorial"){
       "android/hello_apk",
       "android/hello_jni",
       "android/hello_aar",
+      "android/foo",
+      "android/bar",
     ]
   }
 }
